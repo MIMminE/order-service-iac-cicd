@@ -1,6 +1,17 @@
+
 spring:
   application:
     name: order-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orders_local
+    username: orders
+    password: orders
+    jpa:
+      hibernate:
+        ddl-auto: validate
+    flyway:
+      enabled: true
 
 server:
   port: 8080
@@ -14,3 +25,9 @@ management:
     health:
       probes:
         enabled: true
+
+app:
+  jwt:
+    issuer: "orders-local"
+    secret: ${APP_JWT_SECRET:local-dev-secret-key}
+    access-token-ttl-seconds: 900
