@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/order_service
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+
+app:
+  jwt:
+    issuer: "order-service-dev"
+    secret: "dev-secret-change-me-dev-secret-change-me-dev-secret-change-me"
+    access-token-ttl-seconds: 3600
