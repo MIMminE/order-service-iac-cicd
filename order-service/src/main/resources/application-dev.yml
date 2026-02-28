@@ -19,5 +19,5 @@ logging:
 app:
   jwt:
     issuer: "order-service-dev"
-    secret: "dev-secret-change-me-dev-secret-change-me-dev-secret-change-me"
+    secret: "dev-secret"
     access-token-ttl-seconds: 3600
