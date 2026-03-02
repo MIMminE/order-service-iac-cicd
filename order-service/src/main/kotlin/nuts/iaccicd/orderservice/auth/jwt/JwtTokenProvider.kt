@@ -1,8 +1,8 @@
 package nuts.iaccicd.orderservice.auth.jwt
 
+import tools.jackson.databind.ObjectMapper
 import nuts.iaccicd.orderservice.auth.config.JwtProperties
 import org.springframework.stereotype.Component
-import tools.jackson.databind.ObjectMapper
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.Base64
@@ -60,14 +60,14 @@ class JwtTokenProvider(
         val payloadJson = String(base64UrlDecoder.decode(payloadPart), StandardCharsets.UTF_8)
         val node = objectMapper.readTree(payloadJson)
 
-        val iss = node["iss"]?.asString() ?: throw JwtException("Missing iss")
+        val iss = node["iss"]?.asText() ?: throw JwtException("Missing iss")
         if (iss != props.issuer) throw JwtException("Invalid issuer")
 
-        val sub = node["sub"]?.asString() ?: throw JwtException("Missing sub")
+        val sub = node["sub"]?.asText() ?: throw JwtException("Missing sub")
         val userId = sub.toLongOrNull() ?: throw JwtException("Invalid sub")
 
-        val email = node["email"]?.asString() ?: throw JwtException("Missing email")
-        val role = node["role"]?.asString() ?: "USER"
+        val email = node["email"]?.asText() ?: throw JwtException("Missing email")
+        val role = node["role"]?.asText() ?: "USER"
 
         val exp = node["exp"]?.asLong() ?: throw JwtException("Missing exp")
         val now = Instant.now().epochSecond

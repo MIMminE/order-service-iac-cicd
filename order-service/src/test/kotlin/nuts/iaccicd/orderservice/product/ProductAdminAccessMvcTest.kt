@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.post
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
-import tools.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 
 @Suppress("NonAsciiCharacters")
 @Testcontainers

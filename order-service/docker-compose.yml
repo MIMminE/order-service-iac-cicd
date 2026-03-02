@@ -2,18 +2,23 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: orderdb
-      POSTGRES_USER: order
-      POSTGRES_PASSWORD: orderpw
+      POSTGRES_DB: orders_local
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders
+      TZ: Asia/Seoul
     ports:
       - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U order -d orderdb"]
+      test: [ "CMD-SHELL", "pg_isready -U orders -d orders_local" ]
       interval: 5s
       timeout: 3s
       retries: 20
 
   order-service:
+    build:
+      context: .
     image: order-service:local
     depends_on:
       db:
@@ -21,7 +26,11 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/orderdb
-      SPRING_DATASOURCE_USERNAME: order
-      SPRING_DATASOURCE_PASSWORD: orderpw
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/orders_local"
+      SPRING_DATASOURCE_USERNAME: orders
+      SPRING_DATASOURCE_PASSWORD: orders
+      APP_JWT_SECRET: local-dev-secret-key
+      TZ: Asia/Seoul
+
+volumes:
+  db-data:
