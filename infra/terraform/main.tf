@@ -83,7 +83,7 @@ resource "aws_route_table_association" "public" {
 # NAT Gateway (1개: 비용 절감, 대신 AZ 장애시 private outbound 영향)
 resource "aws_eip" "nat" {
   domain = "vpc"
-  tags = { Name = "${local.name_prefix}-nat-eip" }
+  tags   = { Name = "${local.name_prefix}-nat-eip" }
 }
 
 resource "aws_nat_gateway" "this" {
@@ -96,7 +96,7 @@ resource "aws_nat_gateway" "this" {
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
-  tags = { Name = "${local.name_prefix}-rt-private" }
+  tags   = { Name = "${local.name_prefix}-rt-private" }
 }
 
 resource "aws_route" "private_out" {
@@ -194,7 +194,7 @@ resource "aws_security_group" "rds" {
 resource "aws_ecr_repository" "this" {
   name                 = var.service_name
   image_tag_mutability = "MUTABLE"
-  force_delete = true
+  force_delete         = true
 
   image_scanning_configuration {
     scan_on_push = true
@@ -241,14 +241,14 @@ resource "aws_db_subnet_group" "this" {
 resource "aws_db_instance" "this" {
   identifier = "${local.name_prefix}-db"
 
-  engine              = "postgres"
-  instance_class      = var.db_instance_class
-  allocated_storage   = 20
-  storage_type        = "gp3"
-  db_name             = var.db_name
-  username            = var.db_username
-  password            = random_password.db.result
-  port                = 5432
+  engine            = "postgres"
+  instance_class    = var.db_instance_class
+  allocated_storage = 20
+  storage_type      = "gp3"
+  db_name           = var.db_name
+  username          = var.db_username
+  password          = random_password.db.result
+  port              = 5432
 
   publicly_accessible    = false
   db_subnet_group_name   = aws_db_subnet_group.this.name

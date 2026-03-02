@@ -9,11 +9,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "tfstate-harun-portfolio"
-    key            = "portfolio/order-service.tfstate"
-    region         = "ap-northeast-2"
+    bucket = "tfstate-harun-portfolio"
+    key    = "portfolio/order-service.tfstate"
+    region = "ap-northeast-2"
     # dynamodb_table = "terraform-locks"
-    encrypt        = true
+    encrypt = true
   }
 }
 
