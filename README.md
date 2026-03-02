@@ -1,6 +1,8 @@
 # order-service-iac-cicd
 
-이 저장소는 Terraform + AWS ECS + GitHub Actions를 이용한 코드 기반 인프라(CICD) 실습용 예제입니다. 주요 구성 요소:
+이 저장소는 Terraform + AWS ECS + GitHub Actions를 이용한 코드 기반 인프라(CICD) 실습용 예제입니다.
+
+주요 구성 요소:
 
 - `order-service`: Spring Boot 기반 주문/상품 서비스
 - `infra/terraform`: AWS와 연동되는 Terraform 구성

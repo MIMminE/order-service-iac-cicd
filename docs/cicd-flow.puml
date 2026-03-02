@@ -1,0 +1,45 @@
+@startuml
+title CI/CD Flow - GitHub Actions + Terraform + ECR/ECS
+
+actor Developer
+participant "GitHub\nRepository" as GitHub
+participant "GitHub Actions\n(CI)" as Actions
+participant "Container Registry\n(ECR)" as ECR
+participant "Terraform\n(Plan Artifact)" as Terraform
+participant "Reviewer / Operator" as Reviewer
+participant "AWS\n(ECS)" as AWS
+
+Developer -> GitHub: Push (feature branch) / Open PR
+GitHub -> Actions: Trigger workflow (on: push, pull_request)
+
+Actions -> Actions: Checkout code
+Actions -> Actions: Setup JDK, Gradle
+Actions -> Actions: Run `./gradlew test` (Build & Test)
+
+Actions -> Actions: Build Docker image
+Actions -> ECR: Authenticate & Push image (tag: ${GITHUB_SHA} / latest)
+
+Actions -> Actions: Prepare Terraform environment (init)
+Actions -> Terraform: terraform plan -out=tfplan
+Terraform -> Actions: Upload `tfplan` as artifact (plan_run_id)
+
+note right of Actions
+  - Plan artifact uploaded for review
+  - Workflow posts comment with plan details (optional)
+end note
+
+Reviewer -> GitHub: Review PR and inspect `tfplan` artifact
+Reviewer -> Actions: Manually trigger Apply workflow (inputs: plan_run_id)
+
+Actions -> Actions: Download `tfplan` artifact
+Actions -> Terraform: terraform apply "tfplan"
+Terraform -> AWS: Update resources (ECS TaskDefinition, Service rollout)
+
+AWS -> Developer: Deployment / rollout status (via logs or notification)
+
+note over GitHub,Actions
+  Optional: OIDC or AWS Secrets used for auth
+end note
+
+@enduml
+
