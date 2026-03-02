@@ -9,16 +9,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
           cache: gradle
 
-      - working-directory: order-service
+      - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
+        working-directory: order-service
 
-      - working-directory: order-service
-        run: ./order-service/gradlew test --no-daemon
+      - name: Run tests
+        run: ./gradlew test --no-daemon
+        working-directory: order-service
