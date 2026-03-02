@@ -1,14 +1,13 @@
 name: Terraform Apply
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Target environment'
-        required: true
-        default: 'production'
+  workflow_run:
+    workflows: ["Terraform Plan"]
+    types:
+      - completed
 
 jobs:
   terraform-apply:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -22,6 +21,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Configure AWS Credentials (access key)
         uses: aws-actions/configure-aws-credentials@v2
