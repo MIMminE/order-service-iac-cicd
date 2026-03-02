@@ -42,6 +42,28 @@ jobs:
           echo "Found plan run id: $run_id"
           echo "result=$run_id" >> "$GITHUB_OUTPUT"
 
+      - name: Verify artifacts in selected plan run
+        id: verify-artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id=${{ steps.plan-run.outputs.result }}
+          echo "Checking artifacts for run id: $run_id"
+          artifacts_json=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/runs/$run_id/artifacts")
+          echo "Artifacts JSON:\n$artifacts_json"
+          artifact_names=$(echo "$artifacts_json" | jq -r '.artifacts[]?.name' || true)
+          if [ -z "$(echo "$artifact_names" | tr -d '\n')" ]; then
+            echo "No artifacts found for run $run_id. Ensure the Terraform Plan workflow uploaded 'tfplan' as an artifact." >&2
+            exit 1
+          fi
+          echo "Artifacts available for run $run_id:\n$artifact_names"
+          matches=$(echo "$artifact_names" | grep -x "tfplan" || true)
+          if [ -z "$matches" ]; then
+            echo "Artifact 'tfplan' not found for run $run_id. Available artifacts:\n$artifact_names" >&2
+            exit 1
+          fi
+          echo "Found artifact 'tfplan' in run $run_id"
+
       - name: Download Plan
         uses: actions/download-artifact@v4
         with:
