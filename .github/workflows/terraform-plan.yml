@@ -42,9 +42,9 @@ jobs:
         working-directory: infra/terraform
         run: |
           echo "Checking for tfplan in infra/terraform..."
-          ls -la infra/terraform || true
-          if [ ! -f infra/terraform/tfplan ]; then
-            echo "tfplan not found at infra/terraform/tfplan. Terraform plan may have failed or created file at a different path." >&2
+          ls -la . || true
+          if [ ! -f ./tfplan ]; then
+            echo "tfplan not found in infra/terraform/tfplan. Terraform plan may have failed or created file at a different path." >&2
             exit 1
           fi
           echo "tfplan present"
