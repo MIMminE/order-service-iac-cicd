@@ -225,8 +225,10 @@ resource "aws_secretsmanager_secret_version" "db" {
 resource "random_password" "db" {
   length  = 24
   special = true
-}
 
+  # RDS 금지 문자 제외: /, @, ", space
+  override_special = "!#$%&'()*+,-.:;<=>?[]^_{|}~"
+}
 ############################
 # RDS (PostgreSQL)
 ############################
