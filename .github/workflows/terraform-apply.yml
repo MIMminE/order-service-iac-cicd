@@ -1,15 +1,20 @@
 name: Terraform Apply
 on:
-  workflow_run:
-    workflows: ["Terraform Plan"]
-    types:
-      - completed
+  workflow_dispatch:
+    inputs:
+      plan_run_id:
+        description: '(optional) The run id of the Terraform Plan execution that produced tfplan. If empty, workflow will use the latest successful Terraform Plan run.'
+        required: false
+        default: ''
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'production'
 
 jobs:
   terraform-apply:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ github.event.inputs.environment }}
     permissions:
       contents: read
 
@@ -17,11 +22,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Determine plan run id
+        id: plan-run
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${{ github.event.inputs.plan_run_id }}" ]; then
+            echo "result=${{ github.event.inputs.plan_run_id }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Searching recent workflow runs for a successful 'Terraform Plan'..."
+          runs_json=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=50")
+          run_id=$(echo "$runs_json" | jq -r '.workflow_runs[] | select(.name=="Terraform Plan" and .conclusion=="success") | .id' | head -n1 || true)
+          if [ -z "$run_id" ]; then
+            echo "No successful Terraform Plan run found in recent workflow runs. Provide plan_run_id when running this workflow." >&2
+            exit 1
+          fi
+          echo "Found plan run id: $run_id"
+          echo "result=$run_id" >> "$GITHUB_OUTPUT"
+
       - name: Download Plan
         uses: actions/download-artifact@v4
         with:
           name: tfplan
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ steps.plan-run.outputs.result }}
 
       - name: Configure AWS Credentials (access key)
         uses: aws-actions/configure-aws-credentials@v2
@@ -33,7 +58,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.14.6
+          terraform_version: 1.5.0
 
       - name: Terraform Apply
         working-directory: infra/terraform
