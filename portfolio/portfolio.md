@@ -58,12 +58,11 @@ cd order-service; .\gradlew bootJar; java -jar build/libs/*.jar
 
 ## 서비스 주요 기능
 
-이 프로젝트는 인증(Auth), 오더(Order), 상품(Product) 세 가지 영역을 중심으로 구성되어 있습니다. 아래는 실제 포트폴리오·문서에 쓸 수 있는 API 중심 설명입니다. 엔드포인트는 예시이며, 서비스
-코드의 실제 경로(`src/main/kotlin/...`)를 확인해 필요한 경우 세부명을 맞춰 적으세요.
+이 프로젝트는 인증(Auth), 오더(Order), 상품(Product) 세 가지 영역을 중심으로 구성되어 있습니다. 
 
 ### 1) 인증 (Authentication)
 
-- 목적: 사용자 인증/권한 부여 및 토큰 발급(JWT 기반 가정)
+- 목적: 사용자 인증/권한 부여 및 토큰 발급
 - 주요 엔드포인트:
     - POST /api/auth/register
         - 설명: 신규 사용자 가입
