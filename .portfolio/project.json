@@ -1,0 +1,30 @@
+{
+  "id": "order-service-iac-cicd",
+  "title": "Order Service IaC/CD",
+  "subtitle": "주문 서비스와 AWS 배포 파이프라인",
+  "category": "백엔드 아키텍처형",
+  "status": "Portfolio Ready",
+  "description": "Spring Boot 주문 서비스에 Terraform, AWS ECS, GitHub Actions 배포 흐름을 붙인 백엔드/인프라 프로젝트입니다.",
+  "problem": "백엔드 서비스는 코드 구현뿐 아니라 이미지 빌드, 인프라 변경, 배포 승인 흐름까지 재현 가능해야 합니다.",
+  "solution": "Terraform plan/apply와 Docker image build/push workflow를 분리하고 ECS 배포 구조를 문서화했습니다.",
+  "impact": "서비스 구현과 클라우드 배포 파이프라인을 함께 이해하고 있음을 보여줍니다.",
+  "stacks": ["Kotlin", "Spring Boot", "Terraform", "AWS ECS", "ECR", "GitHub Actions", "PostgreSQL"],
+  "highlights": ["AWS IaC", "Terraform Plan/Apply", "ECR Image Push", "JWT Auth", "Pessimistic Stock Lock"],
+  "interviewPoints": [
+    "Plan과 Apply를 분리한 이유 설명",
+    "ECS/ECR 중심의 컨테이너 배포 흐름 설명",
+    "운영 배포에서 수동 승인 지점이 필요한 이유 설명"
+  ],
+  "coverImage": {
+    "path": "portfolio/order-console-main.png",
+    "alt": "Order Service IaC/CD 배포 콘솔"
+  },
+  "documents": [
+    { "label": "README", "path": "README.md", "type": "docs" },
+    { "label": "포트폴리오 설명", "path": "portfolio/portfolio.md", "type": "docs" }
+  ],
+  "localDemo": {
+    "label": "Order Console",
+    "url": "http://localhost:18082"
+  }
+}
