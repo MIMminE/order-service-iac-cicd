@@ -39,6 +39,7 @@ class SecurityConfig(
             }
             .authorizeHttpRequests { auth ->
                 auth
+                    .requestMatchers("/", "/index.html", "/assets/**").permitAll()
                     .requestMatchers("/actuator/health/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()

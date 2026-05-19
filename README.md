@@ -1,20 +1,64 @@
-# order-service-iac-cicd
+# Order Service IaC/CD
 
-이 저장소는 Terraform + AWS ECS + GitHub Actions를 이용한 코드 기반 인프라(CICD) 실습용 예제입니다.
+Spring Boot 주문 서비스에 Terraform, AWS ECS, GitHub Actions 배포 흐름을 붙인 백엔드/인프라 포트폴리오입니다. 주문 생성 시 상품 재고를 비관락으로 차감하고, 로컬에서는 운영자가 상품과 주문 흐름을 확인할 수 있는 웹 콘솔을 함께 제공합니다.
 
-주요 구성 요소:
+![Order console](portfolio/order-console-main.png)
 
-- `order-service`: Spring Boot 기반 주문/상품 서비스
-- `infra/terraform`: AWS와 연동되는 Terraform 구성
-- `.github/workflows`: CI/CD 워크플로우 (빌드/테스트, Docker 빌드/푸시, Terraform plan/apply)
+![Order flow](portfolio/order-console-flow.png)
 
-## 1) 로컬 개발
+## 핵심 포인트
 
-- 로컬 DB(Postgres)는 `docker compose up --build`로 띄우고, `SPRING_DATASOURCE_*` 값을 맞춥니다.
-- Gradle로 빌드 및 테스트: `order-service` 디렉터리에서 `./gradlew test` 실행
-- 애플리케이션 실행: `./gradlew bootRun` 또는 빌드한 JAR 실행
+- Kotlin/Spring Boot 기반 주문, 상품, 인증 API
+- JWT 인증과 관리자 권한 기반 상품 등록
+- 주문 생성 시 상품 row를 `PESSIMISTIC_WRITE`로 잠그고 재고 차감
+- Flyway migration으로 DB 스키마 버전 관리
+- Docker Compose 기반 로컬 재현 환경
+- Terraform plan/apply와 GitHub Actions 배포 파이프라인 분리
 
-## 2) GitHub Action
+## 로컬 실행
+
+```bash
+cd order-service
+docker compose up --build -d
+```
+
+| Target | URL |
+| --- | --- |
+| 주문 운영 콘솔 | http://localhost:18082 |
+| Health Check | http://localhost:18082/actuator/health |
+| PostgreSQL | localhost:15435 |
+
+로컬 콘솔 계정은 `admin@orders.local / password123`입니다. 상품 목록 조회, 상품 등록, 주문 생성, 주문 상세 확인 흐름을 한 화면에서 볼 수 있습니다. 화면은 API 문서 대신 운영자가 보는 콘솔처럼 구성해, 재고 차감 결과와 배포 파이프라인 흐름을 함께 확인할 수 있게 했습니다.
+
+## API 흐름
+
+```bash
+curl -X POST http://localhost:18082/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@orders.local","password":"password123"}'
+```
+
+```bash
+curl http://localhost:18082/products
+curl -X POST http://localhost:18082/orders \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"items":[{"productId":1,"quantity":2}]}'
+```
+
+## 구조
+
+```text
+order-service/src/main/kotlin/.../auth       JWT login and security
+order-service/src/main/kotlin/.../product    Product catalog and stock lock query
+order-service/src/main/kotlin/.../order      Order creation and stock deduction
+order-service/src/main/resources/static      Browser console
+infra/terraform                              ECS, ECR, networking, task definition
+.github/workflows                            Build, image push, Terraform plan/apply
+portfolio                                    Portfolio screenshots and notes
+```
+
+## GitHub Actions
 
 - 인증 방식: 워크플로우는 OIDC 대신 GitHub Secrets에 저장된 AWS 액세스 키(`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`)를 사용하도록
   구성되어 있습니다.
@@ -34,14 +78,14 @@
 - Build & Test (`.github/workflows/build-and-test.yml`)
     - PR/푸시 시 Gradle 빌드와 테스트를 수행합니다. `working-directory`가 `order-service`로 정확히 지정되어 있으므로 `./gradlew`를 올바르게 실행합니다.
 
-## 3) 필수 GitHub Secrets(리포지토리 → Settings → Secrets and variables → Actions)
+## 필수 GitHub Secrets
 
 - AWS_ACCESS_KEY_ID
 - AWS_SECRET_ACCESS_KEY
 - AWS_REGION
 - TF_STATE_BUCKET  (Terraform 원격 상태 S3 버킷)
 
-## 4) 워크플로우 실행 방법
+## 워크플로우 실행 방법
 
 - Terraform Plan: PR을 만들거나 Actions → Terraform Plan → Run workflow로 실행
     - 실행 후 Actions 페이지에서 해당 run을 열어 Artifacts에 `tfplan`이 있는지 확인하세요.
